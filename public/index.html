@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener | Node.js Express</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-decor"></div>
+
+  <main class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-pill">
+        <span class="icon">🔗</span>
+        <span>Node.js Project</span>
+      </div>
+      <h1 class="title">URL <span class="gradient-text">Shortener</span></h1>
+      <p class="subtitle">
+        Turn long, complex URLs into clean, fast-redirecting short links. Demonstrating dynamic routing and formal HTTP redirection in Node.js.
+      </p>
+
+      <!-- Skill Tags -->
+      <div class="skills-badges">
+        <span class="badge"><code>app.get('/:shortUrl')</code> Dynamic Routing</span>
+        <span class="badge"><code>req.body</code> Request Handling</span>
+        <span class="badge"><code>res.redirect()</code> HTTP 302 Header</span>
+      </div>
+    </header>
+
+    <!-- Shortener Card -->
+    <section class="card shorten-card">
+      <form id="shortenForm" class="shorten-form">
+        <div class="input-group">
+          <label for="originalUrl">Long URL to Shorten</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🌐</span>
+            <input
+              type="text"
+              id="originalUrl"
+              name="originalUrl"
+              placeholder="https://example.com/very/long/path/with?parameters=true"
+              required
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="customCode">Custom Alias <span class="optional">(optional)</span></label>
+          <div class="input-wrapper">
+            <span class="input-prefix" id="domainPrefix">localhost:3000/</span>
+            <input
+              type="text"
+              id="customCode"
+              name="customCode"
+              placeholder="my-link"
+              pattern="[a-zA-Z0-9-_]+"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary">
+          <span class="btn-text">Shorten URL</span>
+          <span class="btn-icon">⚡</span>
+        </button>
+      </form>
+
+      <!-- Alert Box -->
+      <div id="alertBox" class="alert hidden"></div>
+
+      <!-- Result Box -->
+      <div id="resultBox" class="result-box hidden">
+        <div class="result-header">
+          <span class="success-pill">✓ Link Created</span>
+          <span class="clicks-pill" id="resultClicks">0 clicks</span>
+        </div>
+        
+        <div class="result-url-display">
+          <input type="text" id="shortUrlDisplay" readonly />
+          <button id="copyBtn" class="btn btn-secondary">
+            <span id="copyIcon">📋</span>
+            <span id="copyText">Copy</span>
+          </button>
+          <a id="visitBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+            <span>Visit</span> ↗
+          </a>
+        </div>
+
+        <p class="result-target">
+          Redirects to: <span id="targetUrlDisplay"></span>
+        </p>
+      </div>
+    </section>
+
+    <!-- URLs Table / Dashboard -->
+    <section class="card table-card">
+      <div class="table-header">
+        <div>
+          <h2>Active Short Links</h2>
+          <p class="table-subtitle">All shortened links with real-time redirection click counts</p>
+        </div>
+        <button id="refreshBtn" class="btn btn-ghost" title="Refresh Links">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="urls-table">
+          <thead>
+            <tr>
+              <th>Short Code</th>
+              <th>Original Destination</th>
+              <th>Clicks</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="urlsTableBody">
+            <tr>
+              <td colspan="5" class="empty-state">Loading shortened links...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Architecture & Concept Explanation -->
+    <section class="card info-card">
+      <h3>📚 How It Works Under the Hood</h3>
+      <div class="info-grid">
+        <div class="info-col">
+          <h4>1. Dynamic Routing</h4>
+          <p>
+            When a user requests <code>http://localhost:3000/:shortUrl</code>, Express matches the path using parameterized routing. The identifier is retrieved via <code>req.params.shortUrl</code>.
+          </p>
+        </div>
+        <div class="info-col">
+          <h4>2. Request Handling</h4>
+          <p>
+            The POST endpoint <code>/api/shorten</code> reads the long URL from <code>req.body</code>, validates the format, and generates a random alphanumeric string if no custom code is provided.
+          </p>
+        </div>
+        <div class="info-col">
+          <h4>3. HTTP Redirection</h4>
+          <p>
+            Express issues an HTTP <code>302 Found</code> header via <code>res.redirect(target)</code>, instructing the client's browser to immediately navigate to the target address.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden">Copied to clipboard!</div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
+
