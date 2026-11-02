@@ -5,7 +5,12 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data', 'urls.json');
+
+// On Vercel (serverless), the filesystem is read-only except for /tmp
+const DATA_FILE = process.env.VERCEL
+  ? path.join('/tmp', 'urls.json')
+  : path.join(__dirname, 'data', 'urls.json');
+const INITIAL_DATA_FILE = path.join(__dirname, 'data', 'urls.json');
 
 // ==========================================
 // 1. Data Store Helper Functions
@@ -13,9 +18,15 @@ const DATA_FILE = path.join(__dirname, 'data', 'urls.json');
 function loadUrls() {
   try {
     if (!fs.existsSync(DATA_FILE)) {
+      let initialData = [];
+      if (fs.existsSync(INITIAL_DATA_FILE)) {
+        try {
+          initialData = JSON.parse(fs.readFileSync(INITIAL_DATA_FILE, 'utf-8') || '[]');
+        } catch (_) {}
+      }
       fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-      fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
-      return [];
+      fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+      return initialData;
     }
     const data = fs.readFileSync(DATA_FILE, 'utf-8');
     return JSON.parse(data || '[]');
@@ -208,12 +219,18 @@ app.use((req, res) => {
 });
 
 // ==========================================
-// 5. Server Startup
+// 5. Server Startup & Export for Vercel
 // ==========================================
-app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`🚀 URL Shortener Server is running!`);
-  console.log(`📡 URL: http://localhost:${PORT}`);
-  console.log(`===============================================`);
-});
+if (process.env.VERCEL) {
+  module.exports = app;
+} else if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`🚀 URL Shortener Server is running!`);
+    console.log(`📡 URL: http://localhost:${PORT}`);
+    console.log(`===============================================`);
+  });
+}
+
+module.exports = app;
 
